@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sorting Hat</string>
+    <string name="auth">Пожалуйста, войдите через VK</string>
+    <string name="auth_button">Вход</string>
+    <string name="list_name">Ваш результат:</string>
+    <string name="loading">Загрузка…</string>
+</resources>
