@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.RequestQueue
+import com.android.volley.VolleyLog
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONException
@@ -28,7 +29,7 @@ class ListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
-
+        VolleyLog.DEBUG = true
         val id = intent.extras?.getString("id")
 
         progressBar = findViewById(R.id.progressBar)
@@ -39,7 +40,8 @@ class ListActivity : AppCompatActivity() {
         listView = findViewById(R.id.facultyList)
         requestQueue = Volley.newRequestQueue(this)
 
-        val service = Parser(id, this)
+        val service = Parser(id, requestQueue)
+        //Parser.SignalChange.requestQueue = requestQueue
         service.parse()
 
         Parser.SignalChange.refreshListListeners.add { refresh(service) }
@@ -54,5 +56,6 @@ class ListActivity : AppCompatActivity() {
         listView.adapter = adapter
         progressBar.visibility = ProgressBar.INVISIBLE
         textView.text = "Ваш результат:"
+        //requestQueue?.add(Parser.SignalChange.request)
     }
 }

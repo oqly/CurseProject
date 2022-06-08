@@ -5,15 +5,17 @@ import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import org.json.JSONException
 import kotlin.properties.Delegates
 
-class Parser(var id: String?, var activity: ListActivity) {
+class Parser(var id: String?, var requestQueue: RequestQueue?) {
     var listItems = arrayOfNulls<String>(12)
 
     object SignalChange {
         var refreshListListeners = ArrayList<() -> Unit>()
+        //var requestQueue: RequestQueue? = null
 
         // fires off every time value of the property changes
         var property1: String by Delegates.observable("initial value") { property, oldValue, newValue ->
@@ -57,6 +59,7 @@ class Parser(var id: String?, var activity: ListActivity) {
             SignalChange.property1 = "complete"
         } catch (e: JSONException) {
             e.printStackTrace()
+            Log.d("TAG","response: ${e.message}")
         }
         }, { error ->
             Log.d("TAG","response: ${error.message}") }) //error -> error.printStackTrace()
@@ -64,9 +67,9 @@ class Parser(var id: String?, var activity: ListActivity) {
         val MY_SOCKET_TIMEOUT_MS = 30000
         val RetryP = DefaultRetryPolicy(MY_SOCKET_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         request.setRetryPolicy(RetryP)
-        Log.d("TAG",request.retryPolicy.currentTimeout.toString())
-        Log.d("TAG",request.retryPolicy.currentRetryCount.toString())
+        Log.d("TAG", request.retryPolicy.currentTimeout.toString())
+        Log.d("TAG", request.retryPolicy.currentRetryCount.toString())
 
-        activity.requestQueue?.add(request)
+        requestQueue?.add(request)
     }
 }
