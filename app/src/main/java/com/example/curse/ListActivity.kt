@@ -20,11 +20,12 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 
-class ListActivity : AppCompatActivity() {
+class ListActivity : AppCompatActivity(), ParserListener {
     lateinit var listView: ListView
     lateinit var progressBar: ProgressBar
     lateinit var textView: TextView
-    var requestQueue: RequestQueue? = null
+    private var requestQueue: RequestQueue? = null
+    private lateinit var service: Parser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,14 +41,12 @@ class ListActivity : AppCompatActivity() {
         listView = findViewById(R.id.facultyList)
         requestQueue = Volley.newRequestQueue(this)
 
-        val service = Parser(id, requestQueue)
-        //Parser.SignalChange.requestQueue = requestQueue
+        service = Parser(id, requestQueue)
+        service.addListener(this)
         service.parse()
-
-        Parser.SignalChange.refreshListListeners.add { refresh(service) }
     }
 
-    private fun refresh(service: Parser){
+    override fun onRequest() {
         val listItems = service.listItems
         val adapter = ArrayAdapter(
             this,
@@ -56,6 +55,5 @@ class ListActivity : AppCompatActivity() {
         listView.adapter = adapter
         progressBar.visibility = ProgressBar.INVISIBLE
         textView.text = "Ваш результат:"
-        //requestQueue?.add(Parser.SignalChange.request)
     }
 }

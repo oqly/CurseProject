@@ -8,23 +8,13 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
 import org.json.JSONException
+import java.lang.ref.WeakReference
 import kotlin.properties.Delegates
 
 class Parser(var id: String?, var requestQueue: RequestQueue?) {
     var listItems = arrayOfNulls<String>(12)
 
-    object SignalChange {
-        var refreshListListeners = ArrayList<() -> Unit>()
-        //var requestQueue: RequestQueue? = null
-
-        // fires off every time value of the property changes
-        var property1: String by Delegates.observable("initial value") { property, oldValue, newValue ->
-            // do your stuff here
-            refreshListListeners.forEach {
-                it()
-            }
-        }
-    }
+    private var listener = WeakReference<ParserListener>(null)
 
     fun parse() {
         val url = "http://192.168.1.87:5000/faculty?id=$id"
@@ -56,7 +46,7 @@ class Parser(var id: String?, var requestQueue: RequestQueue?) {
             }
             Log.d("TAG", "Data End")
 
-            SignalChange.property1 = "complete"
+            listener.get()?.onRequest()
         } catch (e: JSONException) {
             e.printStackTrace()
             Log.d("TAG","response: ${e.message}")
@@ -71,5 +61,9 @@ class Parser(var id: String?, var requestQueue: RequestQueue?) {
         Log.d("TAG", request.retryPolicy.currentRetryCount.toString())
 
         requestQueue?.add(request)
+    }
+
+    fun addListener(listener: ParserListener){
+        this.listener = WeakReference(listener)
     }
 }
