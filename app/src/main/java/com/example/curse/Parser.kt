@@ -11,10 +11,8 @@ import org.json.JSONException
 import java.lang.ref.WeakReference
 import kotlin.properties.Delegates
 
-class Parser(var id: String?, var requestQueue: RequestQueue?) {
+class Parser(var id: String?, var requestQueue: RequestQueue?, var model: ParserViewModel) {
     var listItems = arrayOfNulls<String>(12)
-
-    private var listener = WeakReference<ParserListener>(null)
 
     fun parse() {
         val url = "http://192.168.1.87:5000/faculty?id=$id"
@@ -46,7 +44,7 @@ class Parser(var id: String?, var requestQueue: RequestQueue?) {
             }
             Log.d("TAG", "Data End")
 
-            listener.get()?.onRequest()
+            model.update(listItems)
         } catch (e: JSONException) {
             e.printStackTrace()
             Log.d("TAG","response: ${e.message}")
@@ -61,9 +59,5 @@ class Parser(var id: String?, var requestQueue: RequestQueue?) {
         Log.d("TAG", request.retryPolicy.currentRetryCount.toString())
 
         requestQueue?.add(request)
-    }
-
-    fun addListener(listener: ParserListener){
-        this.listener = WeakReference(listener)
     }
 }

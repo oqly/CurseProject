@@ -1,26 +1,19 @@
 package com.example.curse
 
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
+import androidx.lifecycle.Observer
 import com.android.volley.RequestQueue
 import com.android.volley.VolleyLog
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import org.json.JSONException
-import kotlin.properties.Delegates
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 
-class ListActivity : AppCompatActivity(), ParserListener {
+class ListActivity : AppCompatActivity() {
     lateinit var listView: ListView
     lateinit var progressBar: ProgressBar
     lateinit var textView: TextView
@@ -41,19 +34,21 @@ class ListActivity : AppCompatActivity(), ParserListener {
         listView = findViewById(R.id.facultyList)
         requestQueue = Volley.newRequestQueue(this)
 
-        service = Parser(id, requestQueue)
-        service.addListener(this)
-        service.parse()
-    }
+        val observer = Observer<Array<String?>> { array ->
+            //val listItems = service.listItems
+            val adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1, array
+            )
+            listView.adapter = adapter
+            progressBar.visibility = ProgressBar.INVISIBLE
+            textView.text = "Ваш результат:"
+        }
 
-    override fun onRequest() {
-        val listItems = service.listItems
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1, listItems
-        )
-        listView.adapter = adapter
-        progressBar.visibility = ProgressBar.INVISIBLE
-        textView.text = "Ваш результат:"
+        val model: ParserViewModel by viewModels()
+        model.listItems.observe(this, observer)
+
+        service = Parser(id, requestQueue, model)
+        service.parse()
     }
 }
