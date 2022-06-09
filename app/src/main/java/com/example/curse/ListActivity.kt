@@ -18,7 +18,6 @@ class ListActivity : AppCompatActivity() {
     lateinit var progressBar: ProgressBar
     lateinit var textView: TextView
     private var requestQueue: RequestQueue? = null
-    private lateinit var service: Parser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,6 @@ class ListActivity : AppCompatActivity() {
         requestQueue = Volley.newRequestQueue(this)
 
         val observer = Observer<Array<String?>> { array ->
-            //val listItems = service.listItems
             val adapter = ArrayAdapter(
                 this,
                 android.R.layout.simple_list_item_1, array
@@ -47,8 +45,6 @@ class ListActivity : AppCompatActivity() {
 
         val model: ParserViewModel by viewModels()
         model.listItems.observe(this, observer)
-
-        service = Parser(id, requestQueue, model)
-        service.parse()
+        model.init(id, requestQueue)
     }
 }
